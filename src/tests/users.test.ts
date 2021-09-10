@@ -1,40 +1,40 @@
 import bcrypt from 'bcrypt';
 import request from 'supertest';
-import { createConnection, getRepository } from 'typeorm';
-import App from '@/app';
-import { dbConnection } from '@databases';
+import { createConnection, getRepository, getConnection } from 'typeorm';
+import App from '../app';
+import { dbUsersConnection } from '../databases';
 import { CreateUserDto } from '@dtos/users.dto';
 import UserRoute from '@routes/users.route';
-
 beforeAll(async () => {
-  await createConnection(dbConnection);
+  await createConnection(dbUsersConnection);
 });
 
 afterAll(async () => {
+  await getConnection("Users").close()
   await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
 });
 
 describe('Testing Users', () => {
   describe('[GET] /users', () => {
     it('response findAll users', async () => {
+      const connection = getConnection("Users")
       const usersRoute = new UserRoute();
       const users = usersRoute.usersController.userService.users;
-      const userRepository = getRepository(users);
-
+      const userRepository = connection.getRepository(users);
       userRepository.find = jest.fn().mockReturnValue([
         {
           id: 1,
-          email: 'a@email.com',
+          user: 'a@user.com',
           password: await bcrypt.hash('q1w2e3r4!', 10),
         },
         {
           id: 2,
-          email: 'b@email.com',
+          user: 'b@user.com',
           password: await bcrypt.hash('a1s2d3f4!', 10),
         },
         {
           id: 3,
-          email: 'c@email.com',
+          user: 'c@user.com',
           password: await bcrypt.hash('z1x2c3v4!', 10),
         },
       ]);
@@ -46,16 +46,15 @@ describe('Testing Users', () => {
 
   describe('[GET] /users/:id', () => {
     it('response findOne user', async () => {
-      const userId = 1;
-
+      const connection = getConnection("Users")
       const usersRoute = new UserRoute();
       const users = usersRoute.usersController.userService.users;
-      const userRepository = getRepository(users);
-
+      const userRepository = connection.getRepository(users);
+      const userId = 1;
       userRepository.findOne = jest.fn().mockReturnValue({
         id: userId,
-        email: 'a@email.com',
-        password: await bcrypt.hash('q1w2e3r4!', 10),
+        name: 'a',
+        password: "password",
       });
 
       const app = new App([usersRoute]);
@@ -66,18 +65,19 @@ describe('Testing Users', () => {
   describe('[POST] /users', () => {
     it('response Create user', async () => {
       const userData: CreateUserDto = {
-        email: 'test@email.com',
+        name: 'test@user.com',
         password: 'q1w2e3r4!',
       };
 
+      const connection = getConnection("Users")
       const usersRoute = new UserRoute();
       const users = usersRoute.usersController.userService.users;
-      const userRepository = getRepository(users);
+      const userRepository = connection.getRepository(users);
 
       userRepository.findOne = jest.fn().mockReturnValue(null);
       userRepository.save = jest.fn().mockReturnValue({
         id: 1,
-        email: userData.email,
+        user: userData.name,
         password: await bcrypt.hash(userData.password, 10),
       });
 
@@ -90,17 +90,18 @@ describe('Testing Users', () => {
     it('response Update user', async () => {
       const userId = 1;
       const userData: CreateUserDto = {
-        email: 'test@email.com',
+        name: 'test@user.com',
         password: '1q2w3e4r!',
       };
 
+      const connection = getConnection("Users")
       const usersRoute = new UserRoute();
       const users = usersRoute.usersController.userService.users;
-      const userRepository = getRepository(users);
+      const userRepository = connection.getRepository(users);
 
       userRepository.findOne = jest.fn().mockReturnValue({
         id: userId,
-        email: userData.email,
+        name: userData.name,
         password: await bcrypt.hash(userData.password, 10),
       });
       userRepository.update = jest.fn().mockReturnValue({
@@ -110,7 +111,7 @@ describe('Testing Users', () => {
       });
       userRepository.findOne = jest.fn().mockReturnValue({
         id: userId,
-        email: userData.email,
+        name: userData.name,
         password: await bcrypt.hash(userData.password, 10),
       });
 
@@ -123,13 +124,14 @@ describe('Testing Users', () => {
     it('response Delete user', async () => {
       const userId = 1;
 
+      const connection = getConnection("Users")
       const usersRoute = new UserRoute();
       const users = usersRoute.usersController.userService.users;
-      const userRepository = getRepository(users);
+      const userRepository = connection.getRepository(users);
 
       userRepository.findOne = jest.fn().mockReturnValue({
         id: userId,
-        email: 'a@email.com',
+        user: 'a@user.com',
         password: await bcrypt.hash('q1w2e3r4!', 10),
       });
 

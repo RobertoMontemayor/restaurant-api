@@ -1,10 +1,16 @@
 {
     "env": "development",
-    "dbConfig": {
+    "dbUsersConfig": {
         "host": "localhost",
         "user": "root",
         "password": "password",
-        "database": "typeorm"
+        "database": "Users"
+    },
+    "dbItemsOrdersConfig": {
+        "host": "localhost",
+        "user": "root",
+        "password": "password",
+        "database": "ItemsOrders"
     },
     "secretKey": "secretKey",
     "log": {

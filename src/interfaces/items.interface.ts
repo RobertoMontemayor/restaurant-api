@@ -1,6 +1,6 @@
-export interface User {
+export interface Item {
   id: number;
   name: string    
-  password: string
+  price: number
 }
             
