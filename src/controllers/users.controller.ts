@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { CreateUserDto } from '@dtos/users.dto';
+import { CreateUserDto } from '../dtos/users.dto';
 import { User } from '@interfaces/users.interface';
-import userService from '@services/users.service';
+import userService from '../services/users.service';
 
 class UsersController {
   public userService = new userService();
@@ -10,7 +10,7 @@ class UsersController {
     try {
       const findAllUsersData: User[] = await this.userService.findAllUser();
 
-      res.status(200).json({ data: findAllUsersData, message: 'findAll' });
+      res.status(200).json({ users: findAllUsersData });
     } catch (error) {
       next(error);
     }
@@ -20,7 +20,7 @@ class UsersController {
     try {
       const userId = Number(req.params.id);
       const findOneUserData: User = await this.userService.findUserById(userId);
-
+      console.log()
       res.status(200).json({ data: findOneUserData, message: 'findOne' });
     } catch (error) {
       next(error);

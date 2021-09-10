@@ -1,36 +1,36 @@
 import bcrypt from 'bcrypt';
-import { getRepository } from 'typeorm';
+import { getConnection } from 'typeorm';
 import { CreateUserDto } from '@dtos/users.dto';
-import { UserEntity } from '@entity/users.entity';
-import { HttpException } from '@exceptions/HttpException';
+import { UserEntity } from '../entity/users.entity';
+import { HttpException } from '../exceptions/HttpException';
 import { User } from '@interfaces/users.interface';
-import { isEmpty } from '@utils/util';
+import { isEmpty } from '../utils/util';
 
 class UserService {
   public users = UserEntity;
-
   public async findAllUser(): Promise<User[]> {
-    const userRepository = getRepository(this.users);
+    const connection = getConnection("Users")
+    const userRepository = connection.getRepository(UserEntity);
     const users: User[] = await userRepository.find();
     return users;
   }
 
   public async findUserById(userId: number): Promise<User> {
-    if (isEmpty(userId)) throw new HttpException(400, "You're not userId");
-
-    const userRepository = getRepository(this.users);
+    if (isEmpty(userId)) throw new HttpException(400, "Error");
+    const connection = getConnection("Users")
+    const userRepository = connection.getRepository(UserEntity);
     const findUser: User = await userRepository.findOne({ where: { id: userId } });
-    if (!findUser) throw new HttpException(409, "You're not user");
+    if (!findUser) throw new HttpException(409, "Error");
 
     return findUser;
   }
 
   public async createUser(userData: CreateUserDto): Promise<User> {
-    if (isEmpty(userData)) throw new HttpException(400, "You're not userData");
-
-    const userRepository = getRepository(this.users);
-    const findUser: User = await userRepository.findOne({ where: { email: userData.email } });
-    if (findUser) throw new HttpException(409, `You're email ${userData.email} already exists`);
+    if (isEmpty(userData)) throw new HttpException(400, "Error");
+    const connection = getConnection("Users")
+    const userRepository = connection.getRepository(UserEntity);
+    const findUser: User = await userRepository.findOne({ where: { name: userData.name } });
+    if (findUser) throw new HttpException(409, `You're user ${userData.name} already exists`);
 
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     const createUserData: User = await userRepository.save({ ...userData, password: hashedPassword });
@@ -39,11 +39,11 @@ class UserService {
   }
 
   public async updateUser(userId: number, userData: CreateUserDto): Promise<User> {
-    if (isEmpty(userData)) throw new HttpException(400, "You're not userData");
-
-    const userRepository = getRepository(this.users);
+    if (isEmpty(userData)) throw new HttpException(400, "ErrorData");
+    const connection = getConnection("Users")
+    const userRepository = connection.getRepository(UserEntity);
     const findUser: User = await userRepository.findOne({ where: { id: userId } });
-    if (!findUser) throw new HttpException(409, "You're not user");
+    if (!findUser) throw new HttpException(409, "Error");
 
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     await userRepository.update(userId, { ...userData, password: hashedPassword });
@@ -53,11 +53,11 @@ class UserService {
   }
 
   public async deleteUser(userId: number): Promise<User> {
-    if (isEmpty(userId)) throw new HttpException(400, "You're not userId");
-
-    const userRepository = getRepository(this.users);
+    if (isEmpty(userId)) throw new HttpException(400, "ErrorId");
+    const connection = getConnection("Users")
+    const userRepository = connection.getRepository(UserEntity);
     const findUser: User = await userRepository.findOne({ where: { id: userId } });
-    if (!findUser) throw new HttpException(409, "You're not user");
+    if (!findUser) throw new HttpException(409, "Error");
 
     await userRepository.delete({ id: userId });
     return findUser;

@@ -11,8 +11,8 @@ import morgan from 'morgan';
 import compression from 'compression';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
-import { createConnection } from 'typeorm';
-import { dbConnection } from '@databases';
+import { createConnections } from 'typeorm';
+import { dbUsersConnection, dbItemsOrdersConnection } from './databases';
 import { Routes } from '@interfaces/routes.interface';
 import errorMiddleware from '@middlewares/error.middleware';
 import { logger, stream } from '@utils/logger';
@@ -47,8 +47,14 @@ class App {
     return this.app;
   }
 
-  private connectToDatabase() {
-    createConnection(dbConnection);
+  private async connectToDatabase() {
+    try{
+      await createConnections([dbUsersConnection, dbItemsOrdersConnection]);
+    }catch(err){
+      console.log("this error")
+      console.log(err)
+    }
+    
   }
 
   private initializeMiddlewares() {

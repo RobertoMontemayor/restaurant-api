@@ -1,21 +1,41 @@
 import config from 'config';
-import path from 'path';
 import { ConnectionOptions } from 'typeorm';
 import { dbConfig } from '@interfaces/db.interface';
+import {UserEntity} from "../entity/users.entity"
+import {ItemEntity} from "../entity/items.entity"
+import {OrderItemEntity} from "../entity/orderItem.entity"
+import { OrderEntity } from '@/entity/orders.entity';
 
-const { host, user, password, database }: dbConfig = config.get('dbConfig');
-export const dbConnection: ConnectionOptions = {
-  type: 'postgres',
-  host: host,
-  port: 5432,
-  username: user,
-  password: password,
-  database: database,
+const Users: dbConfig = config.get('dbUsersConfig');
+const ItemsOrders: dbConfig = config.get('dbItemsOrdersConfig');
+export const dbItemsOrdersConnection: ConnectionOptions = {
+  type: "mysql",
+  name: "ItemsOrders",
+  host: ItemsOrders.host,
+  port: 3306,
+  username: ItemsOrders.user,
+  password: ItemsOrders.password,
+  database: ItemsOrders.database,
   synchronize: true,
   logging: false,
-  entities: [path.join(__dirname, '../**/*.entity{.ts,.js}')],
-  migrations: [path.join(__dirname, '../**/*.migration{.ts,.js}')],
-  subscribers: [path.join(__dirname, '../**/*.subscriber{.ts,.js}')],
+  entities: [ItemEntity, OrderItemEntity, OrderEntity],
+  cli: {
+    entitiesDir: 'src/entity',
+    migrationsDir: 'src/migration',
+    subscribersDir: 'src/subscriber',
+  },
+};
+export const dbUsersConnection: ConnectionOptions = {
+  type: "mysql",
+  name: "Users",
+  host: Users.host,
+  port: 3306,
+  username: Users.user,
+  password: Users.password,
+  database: Users.database,
+  synchronize: true,
+  logging: false,
+  entities: [UserEntity],  
   cli: {
     entitiesDir: 'src/entity',
     migrationsDir: 'src/migration',
